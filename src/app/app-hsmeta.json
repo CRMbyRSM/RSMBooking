@@ -1,12 +1,29 @@
 {
-  "name": "RSM Booking App",
-  "description": "Calendar-based booking management",
-  "version": "1.0.1",
-  "public": true,
-  "scopes": [
-    "crm.objects.deals.read"
-  ],
-  "requiredScopes": [
-    "crm.objects.deals.read"
-  ]
+  "uid": "calendar_sales_app",
+  "type": "app",
+  "config": {
+    "name": "Calendar Sales",
+    "description": "Manage calendar-based product bookings and inventory sales directly in HubSpot. Perfect for studios, advertising slots, rentals, and any date-based product sales.",
+    "distribution": "marketplace",
+    "auth": {
+      "type": "static",
+      "requiredScopes": [
+        "crm.objects.contacts.read",
+        "crm.objects.contacts.write",
+        "crm.objects.companies.read",
+        "crm.objects.companies.write",
+        "crm.objects.deals.read",
+        "crm.objects.deals.write",
+        "crm.schemas.deals.read",
+        "crm.objects.custom.read",
+        "crm.objects.custom.write",
+        "crm.schemas.custom.read"
+      ]
+    },
+    "permittedUrls": {
+      "fetch": [],
+      "iframe": [],
+      "img": []
+    }
+  }
 }

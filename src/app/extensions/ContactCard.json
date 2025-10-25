@@ -1,0 +1,16 @@
+{
+  "type": "crm-card",
+  "data": {
+    "title": "Bookings",
+    "location": "crm.record.tab",
+    "uid": "contact-bookings",
+    "module": {
+      "file": "ContactCard.jsx"
+    },
+    "objectTypes": [
+      {
+        "name": "contacts"
+      }
+    ]
+  }
+}

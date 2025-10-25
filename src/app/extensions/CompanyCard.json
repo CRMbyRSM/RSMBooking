@@ -1,0 +1,16 @@
+{
+  "type": "crm-card",
+  "data": {
+    "title": "Company Bookings",
+    "location": "crm.record.tab",
+    "uid": "company-bookings",
+    "module": {
+      "file": "CompanyCard.jsx"
+    },
+    "objectTypes": [
+      {
+        "name": "companies"
+      }
+    ]
+  }
+}
