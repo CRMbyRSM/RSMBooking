@@ -2,32 +2,6 @@
   "name": "Calendar Sales",
   "description": "Manage calendar-based product bookings and inventory sales directly in HubSpot. Perfect for studios, advertising slots, rentals, and any date-based product sales.",
   "version": "1.0.0",
-  "appCardEnabled": true,
-  "appCards": [],
-  "extensions": {
-    "crm": {
-      "cards": [
-        {
-          "file": "./extensions/DealCard.json",
-          "uid": "deal-booking-card"
-        },
-        {
-          "file": "./extensions/ContactCard.json",
-          "uid": "contact-bookings-card"
-        },
-        {
-          "file": "./extensions/CompanyCard.json",
-          "uid": "company-bookings-card"
-        }
-      ],
-      "pages": [
-        {
-          "file": "./extensions/GridView.json",
-          "uid": "calendar-grid-view"
-        }
-      ]
-    }
-  },
   "public": true,
   "scopes": [
     "crm.objects.contacts.read",
