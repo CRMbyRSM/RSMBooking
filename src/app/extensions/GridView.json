@@ -1,0 +1,9 @@
+{
+  "type": "crm-page",
+  "data": {
+    "title": "Calendar Sales Grid",
+    "location": "crm.navigation.menu",
+    "route": "/calendar-grid"
+  },
+  "file": "./GridView.jsx"
+}

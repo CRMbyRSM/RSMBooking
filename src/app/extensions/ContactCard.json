@@ -1,0 +1,9 @@
+{
+  "type": "crm-card",
+  "data": {
+    "title": "Bookings",
+    "location": "crm.record.contact.right",
+    "objectTypes": ["CONTACT"]
+  },
+  "file": "./ContactCard.jsx"
+}

@@ -1,0 +1,33 @@
+{
+  "name": "calendar-sales",
+  "version": "1.0.0",
+  "description": "HubSpot app for managing calendar-based product bookings and inventory sales",
+  "main": "index.js",
+  "scripts": {
+    "upload": "hs project upload",
+    "watch": "hs project watch",
+    "dev": "hs project dev",
+    "deploy": "hs project upload"
+  },
+  "keywords": [
+    "hubspot",
+    "calendar",
+    "booking",
+    "inventory",
+    "sales",
+    "crm"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@hubspot/ui-extensions": "^latest",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@hubspot/cli": "^7.8.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

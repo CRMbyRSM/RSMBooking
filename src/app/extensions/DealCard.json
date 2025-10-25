@@ -1,0 +1,9 @@
+{
+  "type": "crm-card",
+  "data": {
+    "title": "Product Bookings",
+    "location": "crm.record.deal.right",
+    "objectTypes": ["DEAL"]
+  },
+  "file": "./DealCard.jsx"
+}
