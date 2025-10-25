@@ -1,5 +1,5 @@
 {
-  "name": "rsm-booking-app-v2-extensions",
+  "name": "calendar-sales-extensions",
   "version": "1.0.0",
   "description": "UI extensions for Calendar Sales HubSpot app",
   "dependencies": {
