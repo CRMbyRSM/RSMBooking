@@ -1,0 +1,8 @@
+{
+  "name": "calendar-sales-functions",
+  "version": "1.0.0",
+  "description": "Serverless functions for Calendar Sales HubSpot app",
+  "dependencies": {
+    "@hubspot/serverless-runtime-lib": "^latest"
+  }
+}
