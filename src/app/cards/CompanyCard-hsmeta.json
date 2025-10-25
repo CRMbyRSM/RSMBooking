@@ -2,8 +2,15 @@
   "type": "crm-card",
   "data": {
     "title": "Company Bookings",
-    "location": "crm.record.company.right",
-    "objectTypes": ["COMPANY"]
-  },
-  "file": "./CompanyCard.jsx"
+    "location": "crm.record.tab",
+    "uid": "company-bookings",
+    "module": {
+      "file": "CompanyCard.jsx"
+    },
+    "objectTypes": [
+      {
+        "name": "companies"
+      }
+    ]
+  }
 }

@@ -2,8 +2,15 @@
   "type": "crm-card",
   "data": {
     "title": "Bookings",
-    "location": "crm.record.contact.right",
-    "objectTypes": ["CONTACT"]
-  },
-  "file": "./ContactCard.jsx"
+    "location": "crm.record.tab",
+    "uid": "contact-bookings",
+    "module": {
+      "file": "ContactCard.jsx"
+    },
+    "objectTypes": [
+      {
+        "name": "contacts"
+      }
+    ]
+  }
 }

@@ -1,9 +1,16 @@
 {
-  "type": "crm-page",
+  "type": "crm-card",
   "data": {
     "title": "Calendar Sales Grid",
-    "location": "crm.navigation.menu",
-    "route": "/calendar-grid"
-  },
-  "file": "./GridView.jsx"
+    "location": "crm.record.tab",
+    "uid": "calendar-grid-view",
+    "module": {
+      "file": "GridView.jsx"
+    },
+    "objectTypes": [
+      {
+        "name": "contacts"
+      }
+    ]
+  }
 }
