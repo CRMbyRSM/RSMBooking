@@ -4,7 +4,7 @@
   "config": {
     "name": "Calendar Sales",
     "description": "Manage calendar-based product bookings and inventory sales directly in HubSpot. Perfect for studios, advertising slots, rentals, and any date-based product sales.",
-    "distribution": "marketplace",
+    "distribution": "private",
     "auth": {
       "type": "static",
       "requiredScopes": [
