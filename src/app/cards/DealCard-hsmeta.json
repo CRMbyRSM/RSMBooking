@@ -1,9 +1,9 @@
 {
   "type": "crm-card",
   "data": {
-    "title": "Product Bookings",
+    "title": "Test Card",
     "location": "crm.record.tab",
-    "uid": "deal-product-bookings",
+    "uid": "rsm-booking-test-card-001",
     "module": {
       "file": "DealCard.jsx"
     },
