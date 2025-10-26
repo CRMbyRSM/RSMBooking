@@ -23,6 +23,8 @@ jobs:
         run: npm install -g @hubspot/cli@latest
 
       - name: Create HubSpot config
+        env:
+          HUBSPOT_PAK: ${{ secrets.HUBSPOT_PERSONAL_ACCESS_KEY }}
         run: |
           mkdir -p ~/.config/@hubspot
           cat > ~/.config/@hubspot/config.yml << EOF
@@ -31,11 +33,14 @@ jobs:
             - name: RSMConsultingLLC
               portalId: 139633041
               authType: personalaccesskey
-              personalAccessKey: ${{ secrets.HUBSPOT_PERSONAL_ACCESS_KEY }}
+              personalAccessKey: ${HUBSPOT_PAK}
               auth:
                 tokenInfo:
-                  accessToken: ${{ secrets.HUBSPOT_PERSONAL_ACCESS_KEY }}
+                  accessToken: ${HUBSPOT_PAK}
           EOF
+
+          echo "Config file created"
+          ls -la ~/.config/@hubspot/
 
       - name: Validate project
         run: hs project validate
