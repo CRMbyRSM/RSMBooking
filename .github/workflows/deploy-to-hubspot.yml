@@ -1,0 +1,44 @@
+name: Deploy to HubSpot
+
+on:
+  push:
+    branches:
+      - backup-full-version
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install HubSpot CLI
+        run: npm install -g @hubspot/cli@latest
+
+      - name: Create HubSpot config
+        run: |
+          mkdir -p ~/.config/@hubspot
+          cat > ~/.config/@hubspot/config.yml << EOF
+          defaultPortal: RSMConsultingLLC
+          portals:
+            - name: RSMConsultingLLC
+              portalId: 139633041
+              authType: personalaccesskey
+              personalAccessKey: ${{ secrets.HUBSPOT_PERSONAL_ACCESS_KEY }}
+              auth:
+                tokenInfo:
+                  accessToken: ${{ secrets.HUBSPOT_PERSONAL_ACCESS_KEY }}
+          EOF
+
+      - name: Validate project
+        run: hs project validate
+
+      - name: Upload to HubSpot
+        run: hs project upload --account=RSMConsultingLLC
