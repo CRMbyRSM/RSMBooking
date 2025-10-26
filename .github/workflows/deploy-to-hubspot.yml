@@ -24,17 +24,11 @@ jobs:
           npm install -g @hubspot/cli@latest
           hs --version
 
-      - name: Create HubSpot config directory
-        run: |
-          mkdir -p ~/.config/@hubspot
-          echo "Config directory created"
-          ls -la ~/.config/@hubspot/
-
-      - name: Write HubSpot config file
+      - name: Create HubSpot config in project root
         env:
           HUBSPOT_PAK: ${{ secrets.HUBSPOT_PERSONAL_ACCESS_KEY }}
         run: |
-          cat > ~/.config/@hubspot/config.yml << 'EOFCONFIG'
+          cat > hubspot.config.yml << 'EOFCONFIG'
           defaultPortal: RSMConsultingLLC
           portals:
             - name: RSMConsultingLLC
@@ -47,24 +41,24 @@ jobs:
           EOFCONFIG
 
           # Replace placeholder with actual token
-          sed -i "s/PLACEHOLDER_TOKEN/${HUBSPOT_PAK}/g" ~/.config/@hubspot/config.yml
+          sed -i "s/PLACEHOLDER_TOKEN/${HUBSPOT_PAK}/g" hubspot.config.yml
 
-          echo "Config file created successfully"
-          echo "Verifying config structure (without secrets):"
-          grep -v "Token\|Key" ~/.config/@hubspot/config.yml
+          echo "✅ Config file created in project root"
+          ls -la hubspot.config.yml
 
       - name: Test HubSpot CLI authentication
         run: |
           echo "Testing HubSpot authentication..."
-          hs accounts list || echo "Authentication test failed"
+          hs accounts list
 
       - name: Validate project
         run: |
           echo "Validating project..."
           hs project validate
-          echo "Validation complete"
+          echo "✅ Validation complete"
 
       - name: Upload to HubSpot
         run: |
-          echo "Starting upload to HubSpot..."
-          hs project upload --account=RSMConsultingLLC --debug
+          echo "🚀 Starting upload to HubSpot..."
+          hs project upload --account=RSMConsultingLLC
+          echo "✅ Upload complete"
