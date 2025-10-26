@@ -20,30 +20,51 @@ jobs:
           node-version: '20'
 
       - name: Install HubSpot CLI
-        run: npm install -g @hubspot/cli@latest
+        run: |
+          npm install -g @hubspot/cli@latest
+          hs --version
 
-      - name: Create HubSpot config
+      - name: Create HubSpot config directory
+        run: |
+          mkdir -p ~/.config/@hubspot
+          echo "Config directory created"
+          ls -la ~/.config/@hubspot/
+
+      - name: Write HubSpot config file
         env:
           HUBSPOT_PAK: ${{ secrets.HUBSPOT_PERSONAL_ACCESS_KEY }}
         run: |
-          mkdir -p ~/.config/@hubspot
-          cat > ~/.config/@hubspot/config.yml << EOF
+          cat > ~/.config/@hubspot/config.yml << 'EOFCONFIG'
           defaultPortal: RSMConsultingLLC
           portals:
             - name: RSMConsultingLLC
               portalId: 139633041
               authType: personalaccesskey
-              personalAccessKey: ${HUBSPOT_PAK}
+              personalAccessKey: PLACEHOLDER_TOKEN
               auth:
                 tokenInfo:
-                  accessToken: ${HUBSPOT_PAK}
-          EOF
+                  accessToken: PLACEHOLDER_TOKEN
+          EOFCONFIG
 
-          echo "Config file created"
-          ls -la ~/.config/@hubspot/
+          # Replace placeholder with actual token
+          sed -i "s/PLACEHOLDER_TOKEN/${HUBSPOT_PAK}/g" ~/.config/@hubspot/config.yml
+
+          echo "Config file created successfully"
+          echo "Verifying config structure (without secrets):"
+          grep -v "Token\|Key" ~/.config/@hubspot/config.yml
+
+      - name: Test HubSpot CLI authentication
+        run: |
+          echo "Testing HubSpot authentication..."
+          hs accounts list || echo "Authentication test failed"
 
       - name: Validate project
-        run: hs project validate
+        run: |
+          echo "Validating project..."
+          hs project validate
+          echo "Validation complete"
 
       - name: Upload to HubSpot
-        run: hs project upload --account=RSMConsultingLLC
+        run: |
+          echo "Starting upload to HubSpot..."
+          hs project upload --account=RSMConsultingLLC --debug
