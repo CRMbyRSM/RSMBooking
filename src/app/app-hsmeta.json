@@ -8,6 +8,7 @@
     "auth": {
       "type": "static",
       "requiredScopes": [
+        "oauth",
         "crm.objects.contacts.read",
         "crm.objects.contacts.write",
         "crm.objects.companies.read",
@@ -17,7 +18,8 @@
         "crm.schemas.deals.read",
         "crm.objects.custom.read",
         "crm.objects.custom.write",
-        "crm.schemas.custom.read"
+        "crm.schemas.custom.read",
+        "crm.schemas.custom.write"
       ]
     },
     "permittedUrls": {

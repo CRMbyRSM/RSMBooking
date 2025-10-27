@@ -1,0 +1,126 @@
+{
+  "name": "product_slots",
+  "labels": {
+    "singular": "Product Slot",
+    "plural": "Product Slots"
+  },
+  "primaryDisplayProperty": "slot_name",
+  "secondaryDisplayProperties": ["start_date", "end_date", "status", "product_name"],
+  "searchableProperties": ["slot_name", "status", "product_name"],
+  "requiredProperties": ["slot_name", "start_date", "end_date", "status"],
+  "properties": [
+    {
+      "name": "slot_name",
+      "label": "Slot Name",
+      "type": "string",
+      "fieldType": "text",
+      "description": "Auto-generated name: [Product Name] - [Start Date] to [End Date]",
+      "hasUniqueValue": false
+    },
+    {
+      "name": "start_date",
+      "label": "Start Date",
+      "type": "date",
+      "fieldType": "date",
+      "description": "First day of the booking period"
+    },
+    {
+      "name": "end_date",
+      "label": "End Date",
+      "type": "date",
+      "fieldType": "date",
+      "description": "Last day of the booking period (inclusive)"
+    },
+    {
+      "name": "status",
+      "label": "Booking Status",
+      "type": "enumeration",
+      "fieldType": "select",
+      "description": "Current status of the booking",
+      "options": [
+        {
+          "label": "Available",
+          "value": "available",
+          "description": "Slot is available for booking"
+        },
+        {
+          "label": "On Hold",
+          "value": "on_hold",
+          "description": "Inquiry received, pending sale"
+        },
+        {
+          "label": "Sold",
+          "value": "sold",
+          "description": "Deal closed, booking confirmed"
+        },
+        {
+          "label": "Configuration",
+          "value": "configuration",
+          "description": "Work in progress for this booking"
+        },
+        {
+          "label": "Delivered",
+          "value": "delivered",
+          "description": "Booking completed and delivered"
+        }
+      ]
+    },
+    {
+      "name": "product_name",
+      "label": "Product Name",
+      "type": "string",
+      "fieldType": "text",
+      "description": "Name of the product being booked (synced from Product)"
+    },
+    {
+      "name": "product_type",
+      "label": "Product Type",
+      "type": "string",
+      "fieldType": "text",
+      "description": "Category or type of product"
+    },
+    {
+      "name": "product_team",
+      "label": "Product Team",
+      "type": "string",
+      "fieldType": "text",
+      "description": "Team responsible for this product"
+    },
+    {
+      "name": "product_size",
+      "label": "Product Size",
+      "type": "string",
+      "fieldType": "text",
+      "description": "Size or capacity of the product"
+    },
+    {
+      "name": "daily_rate",
+      "label": "Daily Rate",
+      "type": "number",
+      "fieldType": "number",
+      "description": "Price per day for this booking"
+    },
+    {
+      "name": "total_amount",
+      "label": "Total Amount",
+      "type": "number",
+      "fieldType": "number",
+      "description": "Total booking value (calculated from deal line item)"
+    },
+    {
+      "name": "duration_days",
+      "label": "Duration (Days)",
+      "type": "number",
+      "fieldType": "number",
+      "description": "Number of days in this booking"
+    },
+    {
+      "name": "booking_notes",
+      "label": "Booking Notes",
+      "type": "string",
+      "fieldType": "textarea",
+      "description": "Additional notes or requirements for this booking"
+    }
+  ],
+  "associatedObjects": ["CONTACT", "COMPANY", "DEAL", "PRODUCT"]
+}
