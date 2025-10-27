@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-import React from 'react';
-import { Text } from '@hubspot/ui-extensions';
-
-export default function SimpleCard() {
-  return <Text>Hello from Calendar Sales</Text>;
-}
-=======
 import React, { useState, useEffect } from 'react';
 import {
   Flex,
@@ -348,4 +340,3 @@ const DealCard = ({ context, actions, runServerless }) => {
 };
 
 export default DealCard;
->>>>>>> backup-full-version

@@ -1,0 +1,18 @@
+[
+  {
+    "properties": {
+      "slot_name": "Studio A - Premium - 2025-12-05 to 2025-12-16",
+      "start_date": "2025-12-05",
+      "end_date": "2025-12-16",
+      "status": "on_hold",
+      "product_name": "Studio A - Premium",
+      "product_type": "Recording Studio",
+      "product_team": "Audio Team",
+      "product_size": "Large (500 sq ft)",
+      "daily_rate": 450,
+      "total_amount": 5400,
+      "duration_days": 12,
+      "booking_notes": "Client requested premium equipment package"
+    }
+  }
+]

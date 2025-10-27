@@ -1,0 +1,482 @@
+[
+  {
+    "properties": {
+      "slot_name": "Studio A - Premium - 2025-12-05 to 2025-12-16",
+      "start_date": "2025-12-05",
+      "end_date": "2025-12-16",
+      "status": "on_hold",
+      "product_name": "Studio A - Premium",
+      "product_type": "Recording Studio",
+      "product_team": "Audio Team",
+      "product_size": "Large (500 sq ft)",
+      "daily_rate": "450",
+      "total_amount": "5400",
+      "duration_days": "12",
+      "booking_notes": "Client requested premium equipment package"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Studio B - Standard - 2026-01-15 to 2026-01-19",
+      "start_date": "2026-01-15",
+      "end_date": "2026-01-19",
+      "status": "available",
+      "product_name": "Studio B - Standard",
+      "product_type": "Recording Studio",
+      "product_team": "Audio Team",
+      "product_size": "Medium (300 sq ft)",
+      "daily_rate": "300",
+      "total_amount": "1500",
+      "duration_days": "5",
+      "booking_notes": "Includes lighting setup and teardown"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Video Suite - 4K - 2025-11-10 to 2025-11-21",
+      "start_date": "2025-11-10",
+      "end_date": "2025-11-21",
+      "status": "sold",
+      "product_name": "Video Suite - 4K",
+      "product_type": "Video Production",
+      "product_team": "Video Team",
+      "product_size": "Large (800 sq ft)",
+      "daily_rate": "650",
+      "total_amount": "7800",
+      "duration_days": "12",
+      "booking_notes": "Extended hours approved"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Podcast Room - 2025-10-20 to 2025-10-30",
+      "start_date": "2025-10-20",
+      "end_date": "2025-10-30",
+      "status": "configuration",
+      "product_name": "Podcast Room",
+      "product_type": "Podcast Studio",
+      "product_team": "Audio Team",
+      "product_size": "Small (150 sq ft)",
+      "daily_rate": "150",
+      "total_amount": "1650",
+      "duration_days": "11",
+      "booking_notes": "Requires technical director on site"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Green Screen Stage - 2025-09-20 to 2025-09-23",
+      "start_date": "2025-09-20",
+      "end_date": "2025-09-23",
+      "status": "delivered",
+      "product_name": "Green Screen Stage",
+      "product_type": "Video Production",
+      "product_team": "Video Team",
+      "product_size": "Extra Large (1200 sq ft)",
+      "daily_rate": "800",
+      "total_amount": "3200",
+      "duration_days": "4",
+      "booking_notes": "Standard booking - no special requirements"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Edit Bay - Pro - 2025-12-18 to 2025-12-19",
+      "start_date": "2025-12-18",
+      "end_date": "2025-12-19",
+      "status": "available",
+      "product_name": "Edit Bay - Pro",
+      "product_type": "Post Production",
+      "product_team": "Post Team",
+      "product_size": "Small (100 sq ft)",
+      "daily_rate": "200",
+      "total_amount": "400",
+      "duration_days": "2",
+      "booking_notes": "VIP client - priority setup"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Billboard - Highway 101 - 2026-02-01 to 2026-02-14",
+      "start_date": "2026-02-01",
+      "end_date": "2026-02-14",
+      "status": "available",
+      "product_name": "Billboard - Highway 101",
+      "product_type": "Outdoor Advertising",
+      "product_team": "Sales Team",
+      "product_size": "14x48 ft",
+      "daily_rate": "2500",
+      "total_amount": "35000",
+      "duration_days": "14",
+      "booking_notes": "Multi-day discount applied"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Billboard - Downtown - 2025-10-15 to 2025-10-22",
+      "start_date": "2025-10-15",
+      "end_date": "2025-10-22",
+      "status": "sold",
+      "product_name": "Billboard - Downtown",
+      "product_type": "Outdoor Advertising",
+      "product_team": "Sales Team",
+      "product_size": "14x48 ft",
+      "daily_rate": "3500",
+      "total_amount": "28000",
+      "duration_days": "8",
+      "booking_notes": "Includes catering services"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Digital Display - Mall - 2025-11-25 to 2025-12-04",
+      "start_date": "2025-11-25",
+      "end_date": "2025-12-04",
+      "status": "on_hold",
+      "product_name": "Digital Display - Mall",
+      "product_type": "Digital Advertising",
+      "product_team": "Digital Team",
+      "product_size": "1920x1080",
+      "daily_rate": "500",
+      "total_amount": "5000",
+      "duration_days": "10",
+      "booking_notes": "Client bringing own equipment"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Radio Spot - Morning Drive - 2026-03-10 to 2026-03-11",
+      "start_date": "2026-03-10",
+      "end_date": "2026-03-11",
+      "status": "available",
+      "product_name": "Radio Spot - Morning Drive",
+      "product_type": "Radio Advertising",
+      "product_team": "Media Team",
+      "product_size": "30 seconds",
+      "daily_rate": "1200",
+      "total_amount": "2400",
+      "duration_days": "2",
+      "booking_notes": "Recurring booking - weekly basis"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Studio A - Premium - 2025-09-10 to 2025-09-11",
+      "start_date": "2025-09-10",
+      "end_date": "2025-09-11",
+      "status": "delivered",
+      "product_name": "Studio A - Premium",
+      "product_type": "Recording Studio",
+      "product_team": "Audio Team",
+      "product_size": "Large (500 sq ft)",
+      "daily_rate": "450",
+      "total_amount": "900",
+      "duration_days": "2",
+      "booking_notes": "Client requested premium equipment package"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Studio B - Standard - 2025-10-28 to 2025-11-02",
+      "start_date": "2025-10-28",
+      "end_date": "2025-11-02",
+      "status": "sold",
+      "product_name": "Studio B - Standard",
+      "product_type": "Recording Studio",
+      "product_team": "Audio Team",
+      "product_size": "Medium (300 sq ft)",
+      "daily_rate": "300",
+      "total_amount": "1800",
+      "duration_days": "6",
+      "booking_notes": "Includes lighting setup and teardown"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Video Suite - 4K - 2025-09-05 to 2025-09-07",
+      "start_date": "2025-09-05",
+      "end_date": "2025-09-07",
+      "status": "delivered",
+      "product_name": "Video Suite - 4K",
+      "product_type": "Video Production",
+      "product_team": "Video Team",
+      "product_size": "Large (800 sq ft)",
+      "daily_rate": "650",
+      "total_amount": "1950",
+      "duration_days": "3",
+      "booking_notes": "Extended hours approved"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Podcast Room - 2025-12-20 to 2025-12-20",
+      "start_date": "2025-12-20",
+      "end_date": "2025-12-20",
+      "status": "available",
+      "product_name": "Podcast Room",
+      "product_type": "Podcast Studio",
+      "product_team": "Audio Team",
+      "product_size": "Small (150 sq ft)",
+      "daily_rate": "150",
+      "total_amount": "150",
+      "duration_days": "1",
+      "booking_notes": "Requires technical director on site"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Green Screen Stage - 2026-01-25 to 2026-02-03",
+      "start_date": "2026-01-25",
+      "end_date": "2026-02-03",
+      "status": "available",
+      "product_name": "Green Screen Stage",
+      "product_type": "Video Production",
+      "product_team": "Video Team",
+      "product_size": "Extra Large (1200 sq ft)",
+      "daily_rate": "800",
+      "total_amount": "8000",
+      "duration_days": "10",
+      "booking_notes": "Standard booking - no special requirements"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Edit Bay - Pro - 2025-11-08 to 2025-11-21",
+      "start_date": "2025-11-08",
+      "end_date": "2025-11-21",
+      "status": "on_hold",
+      "product_name": "Edit Bay - Pro",
+      "product_type": "Post Production",
+      "product_team": "Post Team",
+      "product_size": "Small (100 sq ft)",
+      "daily_rate": "200",
+      "total_amount": "2800",
+      "duration_days": "14",
+      "booking_notes": "VIP client - priority setup"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Billboard - Highway 101 - 2025-10-18 to 2025-10-25",
+      "start_date": "2025-10-18",
+      "end_date": "2025-10-25",
+      "status": "configuration",
+      "product_name": "Billboard - Highway 101",
+      "product_type": "Outdoor Advertising",
+      "product_team": "Sales Team",
+      "product_size": "14x48 ft",
+      "daily_rate": "2500",
+      "total_amount": "20000",
+      "duration_days": "8",
+      "booking_notes": "Multi-day discount applied"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Billboard - Downtown - 2025-11-01 to 2025-11-01",
+      "start_date": "2025-11-01",
+      "end_date": "2025-11-01",
+      "status": "sold",
+      "product_name": "Billboard - Downtown",
+      "product_type": "Outdoor Advertising",
+      "product_team": "Sales Team",
+      "product_size": "14x48 ft",
+      "daily_rate": "3500",
+      "total_amount": "3500",
+      "duration_days": "1",
+      "booking_notes": "Includes catering services"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Digital Display - Mall - 2025-09-01 to 2025-09-07",
+      "start_date": "2025-09-01",
+      "end_date": "2025-09-07",
+      "status": "delivered",
+      "product_name": "Digital Display - Mall",
+      "product_type": "Digital Advertising",
+      "product_team": "Digital Team",
+      "product_size": "1920x1080",
+      "daily_rate": "500",
+      "total_amount": "3500",
+      "duration_days": "7",
+      "booking_notes": "Client bringing own equipment"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Radio Spot - Morning Drive - 2025-12-08 to 2025-12-13",
+      "start_date": "2025-12-08",
+      "end_date": "2025-12-13",
+      "status": "available",
+      "product_name": "Radio Spot - Morning Drive",
+      "product_type": "Radio Advertising",
+      "product_team": "Media Team",
+      "product_size": "30 seconds",
+      "daily_rate": "1200",
+      "total_amount": "7200",
+      "duration_days": "6",
+      "booking_notes": "Recurring booking - weekly basis"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Studio A - Premium - 2025-09-15 to 2025-09-26",
+      "start_date": "2025-09-15",
+      "end_date": "2025-09-26",
+      "status": "delivered",
+      "product_name": "Studio A - Premium",
+      "product_type": "Recording Studio",
+      "product_team": "Audio Team",
+      "product_size": "Large (500 sq ft)",
+      "daily_rate": "450",
+      "total_amount": "5400",
+      "duration_days": "12",
+      "booking_notes": "Client requested premium equipment package"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Studio B - Standard - 2025-10-05 to 2025-10-08",
+      "start_date": "2025-10-05",
+      "end_date": "2025-10-08",
+      "status": "sold",
+      "product_name": "Studio B - Standard",
+      "product_type": "Recording Studio",
+      "product_team": "Audio Team",
+      "product_size": "Medium (300 sq ft)",
+      "daily_rate": "300",
+      "total_amount": "1200",
+      "duration_days": "4",
+      "booking_notes": "Includes lighting setup and teardown"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Video Suite - 4K - 2025-11-18 to 2025-11-29",
+      "start_date": "2025-11-18",
+      "end_date": "2025-11-29",
+      "status": "sold",
+      "product_name": "Video Suite - 4K",
+      "product_type": "Video Production",
+      "product_team": "Video Team",
+      "product_size": "Large (800 sq ft)",
+      "daily_rate": "650",
+      "total_amount": "7800",
+      "duration_days": "12",
+      "booking_notes": "Extended hours approved"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Podcast Room - 2025-10-22 to 2025-11-02",
+      "start_date": "2025-10-22",
+      "end_date": "2025-11-02",
+      "status": "configuration",
+      "product_name": "Podcast Room",
+      "product_type": "Podcast Studio",
+      "product_team": "Audio Team",
+      "product_size": "Small (150 sq ft)",
+      "daily_rate": "150",
+      "total_amount": "1800",
+      "duration_days": "12",
+      "booking_notes": "Requires technical director on site"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Green Screen Stage - 2026-01-05 to 2026-01-16",
+      "start_date": "2026-01-05",
+      "end_date": "2026-01-16",
+      "status": "available",
+      "product_name": "Green Screen Stage",
+      "product_type": "Video Production",
+      "product_team": "Video Team",
+      "product_size": "Extra Large (1200 sq ft)",
+      "daily_rate": "800",
+      "total_amount": "9600",
+      "duration_days": "12",
+      "booking_notes": "Standard booking - no special requirements"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Edit Bay - Pro - 2025-12-01 to 2025-12-11",
+      "start_date": "2025-12-01",
+      "end_date": "2025-12-11",
+      "status": "on_hold",
+      "product_name": "Edit Bay - Pro",
+      "product_type": "Post Production",
+      "product_team": "Post Team",
+      "product_size": "Small (100 sq ft)",
+      "daily_rate": "200",
+      "total_amount": "2200",
+      "duration_days": "11",
+      "booking_notes": "VIP client - priority setup"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Billboard - Highway 101 - 2026-01-28 to 2026-02-10",
+      "start_date": "2026-01-28",
+      "end_date": "2026-02-10",
+      "status": "available",
+      "product_name": "Billboard - Highway 101",
+      "product_type": "Outdoor Advertising",
+      "product_team": "Sales Team",
+      "product_size": "14x48 ft",
+      "daily_rate": "2500",
+      "total_amount": "35000",
+      "duration_days": "14",
+      "booking_notes": "Multi-day discount applied"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Billboard - Downtown - 2026-01-18 to 2026-01-31",
+      "start_date": "2026-01-18",
+      "end_date": "2026-01-31",
+      "status": "available",
+      "product_name": "Billboard - Downtown",
+      "product_type": "Outdoor Advertising",
+      "product_team": "Sales Team",
+      "product_size": "14x48 ft",
+      "daily_rate": "3500",
+      "total_amount": "49000",
+      "duration_days": "14",
+      "booking_notes": "Includes catering services"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Digital Display - Mall - 2025-11-12 to 2025-11-15",
+      "start_date": "2025-11-12",
+      "end_date": "2025-11-15",
+      "status": "sold",
+      "product_name": "Digital Display - Mall",
+      "product_type": "Digital Advertising",
+      "product_team": "Digital Team",
+      "product_size": "1920x1080",
+      "daily_rate": "500",
+      "total_amount": "2000",
+      "duration_days": "4",
+      "booking_notes": "Client bringing own equipment"
+    }
+  },
+  {
+    "properties": {
+      "slot_name": "Radio Spot - Morning Drive - 2025-10-10 to 2025-10-19",
+      "start_date": "2025-10-10",
+      "end_date": "2025-10-19",
+      "status": "sold",
+      "product_name": "Radio Spot - Morning Drive",
+      "product_type": "Radio Advertising",
+      "product_team": "Media Team",
+      "product_size": "30 seconds",
+      "daily_rate": "1200",
+      "total_amount": "12000",
+      "duration_days": "10",
+      "booking_notes": "Recurring booking - weekly basis"
+    }
+  }
+]

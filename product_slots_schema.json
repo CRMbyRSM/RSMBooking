@@ -5,7 +5,7 @@
     "plural": "Product Slots"
   },
   "primaryDisplayProperty": "slot_name",
-  "secondaryDisplayProperties": ["start_date", "end_date", "status", "product_name"],
+  "secondaryDisplayProperties": ["start_date", "status"],
   "searchableProperties": ["slot_name", "status", "product_name"],
   "requiredProperties": ["slot_name", "start_date", "end_date", "status"],
   "properties": [
