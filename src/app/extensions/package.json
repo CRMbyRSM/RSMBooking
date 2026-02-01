@@ -1,10 +1,10 @@
 {
-  "name": "calendar-sales-extensions",
+  "name": "rsm-booking-extensions",
   "version": "1.0.0",
-  "description": "UI extensions for Calendar Sales HubSpot app",
+  "description": "UI Extensions for RSM Booking app",
+  "license": "MIT",
   "dependencies": {
-    "@hubspot/ui-extensions": "^0.0.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "@hubspot/ui-extensions": "^0.14.0",
+    "react": "^18.2.0"
   }
 }

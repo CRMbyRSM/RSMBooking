@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  hubspot,
   Flex,
-  LoadingSpinner,
   Text,
   Table,
   TableHead,
@@ -9,141 +9,175 @@ import {
   TableHeader,
   TableBody,
   TableCell,
-  hubspot
+  LoadingSpinner,
+  Tag,
+  EmptyState,
+  Alert
 } from '@hubspot/ui-extensions';
 
-const ContactCard = ({ context }) => {
-  const [loading, setLoading] = useState(true);
-  const [productSlots, setProductSlots] = useState([]);
+// Register the extension
+hubspot.extend(({ context, runServerlessFunction }) => (
+  <ContactBookingsCard
+    context={context}
+    runServerless={runServerlessFunction}
+  />
+));
 
-  const contactId = context.crm?.objectId;
+const ContactBookingsCard = ({ context, runServerless }) => {
+  const [loading, setLoading] = useState(true);
+  const [slots, setSlots] = useState([]);
+  const [contactInfo, setContactInfo] = useState(null);
+  const [error, setError] = useState(null);
+
+  const contactId = context.crm.objectId;
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await runServerless({
+        name: 'getSlotsForContact',
+        parameters: { contactId }
+      });
+
+      if (result.status === 'SUCCESS') {
+        setSlots(result.response.body.slots);
+        setContactInfo(result.response.body.contact);
+      } else {
+        setError(result.response?.body?.message || 'Failed to load bookings');
+      }
+    } catch (err) {
+      console.error('Error fetching contact bookings:', err);
+      setError('Failed to load bookings. Please refresh.');
+    } finally {
+      setLoading(false);
+    }
+  }, [contactId, runServerless]);
 
   useEffect(() => {
-    const fetchProductSlots = async () => {
-      if (!contactId) return;
+    fetchData();
+  }, [fetchData]);
 
-      setLoading(true);
-      try {
-        // Fetch contact with associations
-        const contactResponse = await hubspot.crm.objects.contact.get({
-          objectId: contactId,
-          associations: ['product_slots']
-        });
+  // Calculate totals
+  const totalValue = slots.reduce(
+    (sum, slot) => sum + (parseFloat(slot.total_amount) || 0),
+    0
+  );
 
-        // Fetch associated product slots
-        if (contactResponse.associations?.product_slots) {
-          const slotIds = contactResponse.associations.product_slots.map(s => s.id);
-          const slotsPromises = slotIds.map(id =>
-            hubspot.crm.objects.custom.product_slots.get({
-              objectId: id,
-              properties: [
-                'slot_name',
-                'start_date',
-                'end_date',
-                'status',
-                'product_name',
-                'total_amount',
-                'duration_days'
-              ]
-            })
-          );
-          const slots = await Promise.all(slotsPromises);
-          setProductSlots(slots);
-        }
-      } catch (error) {
-        console.error('Error fetching product slots:', error);
-      } finally {
-        setLoading(false);
-      }
+  // Status badge styling
+  const getStatusTag = (status) => {
+    const variants = {
+      on_hold: 'warning',
+      sold: 'success',
+      configuration: 'default',
+      delivered: 'info'
     };
-
-    fetchProductSlots();
-  }, [contactId]);
-
-  // Get status badge
-  const getStatusBadge = (status) => {
-    const badges = {
-      on_hold: { bg: '#FFF4E6', text: 'On Hold' },
-      sold: { bg: '#D4EDDA', text: 'Sold' },
-      configuration: { bg: '#FFF3CD', text: 'Configuration' },
-      delivered: { bg: '#D1ECF1', text: 'Delivered' }
+    const labels = {
+      on_hold: 'On Hold',
+      sold: 'Sold',
+      configuration: 'Configuration',
+      delivered: 'Delivered'
     };
-    return badges[status] || { bg: '#f8f9fa', text: status };
+    return {
+      variant: variants[status] || 'default',
+      label: labels[status] || status
+    };
   };
 
   if (loading) {
     return (
-      <Flex align="center" justify="center">
+      <Flex direction="column" align="center" justify="center" gap="md">
         <LoadingSpinner />
+        <Text>Loading bookings...</Text>
       </Flex>
     );
   }
 
-  if (productSlots.length === 0) {
+  if (error) {
     return (
-      <Flex direction="column" gap="small">
-        <Text format={{ fontWeight: 'bold' }}>Bookings</Text>
-        <Text>No bookings found for this contact.</Text>
-      </Flex>
+      <Alert title="Error" variant="error">
+        {error}
+      </Alert>
     );
   }
 
   return (
-    <Flex direction="column" gap="medium">
-      <Text format={{ fontWeight: 'bold' }}>Bookings ({productSlots.length})</Text>
+    <Flex direction="column" gap="md">
+      {/* Header */}
+      <Flex justify="between" align="center">
+        <Text format={{ fontWeight: 'bold' }}>
+          Bookings ({slots.length})
+        </Text>
+        {slots.length > 0 && (
+          <Text format={{ fontWeight: 'bold' }}>
+            Total: ${totalValue.toFixed(2)}
+          </Text>
+        )}
+      </Flex>
 
-      <Table bordered>
-        <TableHead>
-          <TableRow>
-            <TableHeader>Product</TableHeader>
-            <TableHeader>Dates</TableHeader>
-            <TableHeader>Amount</TableHeader>
-            <TableHeader>Status</TableHeader>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {productSlots.map(slot => {
-            const badge = getStatusBadge(slot.properties.status);
-            return (
-              <TableRow key={slot.id}>
-                <TableCell>
-                  <Text format={{ fontWeight: 'bold' }}>
-                    {slot.properties.product_name || 'N/A'}
-                  </Text>
-                </TableCell>
-                <TableCell>
-                  <div>{new Date(slot.properties.start_date).toLocaleDateString()}</div>
-                  <div style={{ fontSize: '0.85em', color: '#666' }}>
-                    to {new Date(slot.properties.end_date).toLocaleDateString()}
-                  </div>
-                  <div style={{ fontSize: '0.85em', color: '#666' }}>
-                    ({slot.properties.duration_days} days)
-                  </div>
-                </TableCell>
-                <TableCell>
-                  ${slot.properties.total_amount || 0}
-                </TableCell>
-                <TableCell>
-                  <span style={{
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    backgroundColor: badge.bg,
-                    fontSize: '0.85em'
-                  }}>
-                    {badge.text}
-                  </span>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-
-      <Text format={{ fontSize: 'small', color: 'secondary' }}>
-        Total bookings value: ${productSlots.reduce((sum, slot) => sum + (parseFloat(slot.properties.total_amount) || 0), 0).toFixed(2)}
-      </Text>
+      {/* Bookings Table */}
+      {slots.length > 0 ? (
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableHeader>Product</TableHeader>
+              <TableHeader>Dates</TableHeader>
+              <TableHeader>Amount</TableHeader>
+              <TableHeader>Status</TableHeader>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {slots.map((slot) => {
+              const statusTag = getStatusTag(slot.status);
+              return (
+                <TableRow key={slot.id}>
+                  <TableCell>
+                    <Text format={{ fontWeight: 'bold' }}>
+                      {slot.product_name || 'N/A'}
+                    </Text>
+                  </TableCell>
+                  <TableCell>
+                    <Flex direction="column">
+                      <Text>
+                        {new Date(slot.start_date).toLocaleDateString()}
+                      </Text>
+                      <Text variant="microcopy">
+                        to {new Date(slot.end_date).toLocaleDateString()}
+                      </Text>
+                      <Text variant="microcopy">
+                        ({slot.duration_days} days)
+                      </Text>
+                    </Flex>
+                  </TableCell>
+                  <TableCell>
+                    <Text format={{ fontWeight: 'bold' }}>
+                      ${parseFloat(slot.total_amount || 0).toFixed(2)}
+                    </Text>
+                  </TableCell>
+                  <TableCell>
+                    <Tag variant={statusTag.variant}>
+                      {statusTag.label}
+                    </Tag>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      ) : (
+        <EmptyState
+          title="No bookings"
+          layout="vertical"
+          reverseOrder={true}
+        >
+          <Text>
+            This contact has no product bookings yet.
+          </Text>
+        </EmptyState>
+      )}
     </Flex>
   );
 };
 
-export default ContactCard;
+export default ContactBookingsCard;

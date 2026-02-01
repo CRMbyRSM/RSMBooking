@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
+  hubspot,
   Flex,
-  LoadingSpinner,
   Text,
   Button,
   Table,
@@ -10,25 +10,28 @@ import {
   TableHeader,
   TableBody,
   TableCell,
+  LoadingSpinner,
   Select,
-  Input,
-  hubspot
+  Alert,
+  Box,
+  Tile
 } from '@hubspot/ui-extensions';
 
-const GridView = () => {
+// Register the extension
+hubspot.extend(({ runServerlessFunction }) => (
+  <CalendarGridView runServerless={runServerlessFunction} />
+));
+
+const CalendarGridView = ({ runServerless }) => {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
-  const [productSlots, setProductSlots] = useState([]);
-  const [dateRange, setDateRange] = useState([]);
+  const [slots, setSlots] = useState([]);
+  const [error, setError] = useState(null);
   const [startDate, setStartDate] = useState(new Date());
-  const [filters, setFilters] = useState({
-    productType: '',
-    status: '',
-    owner: ''
-  });
+  const [filterStatus, setFilterStatus] = useState('');
 
   // Generate 50-day date range
-  useEffect(() => {
+  const dateRange = useMemo(() => {
     const dates = [];
     const start = new Date(startDate);
     for (let i = 0; i < 50; i++) {
@@ -36,291 +39,332 @@ const GridView = () => {
       date.setDate(start.getDate() + i);
       dates.push(date);
     }
-    setDateRange(dates);
+    return dates;
   }, [startDate]);
 
-  // Fetch products and product slots
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // Fetch all products
-        const productsResponse = await hubspot.crm.objects.products.list({
-          limit: 100,
-          properties: ['name', 'hs_sku', 'price', 'product_type', 'product_team', 'product_size']
-        });
-        setProducts(productsResponse.results || []);
+  // Fetch all data
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-        // Fetch product slots within date range
-        const endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 50);
+    try {
+      const result = await runServerless({
+        name: 'getAllSlots',
+        parameters: {}
+      });
 
-        const slotsResponse = await hubspot.crm.objects.custom.product_slots.list({
-          limit: 500,
-          properties: [
-            'slot_name',
-            'start_date',
-            'end_date',
-            'status',
-            'product_name',
-            'product_type',
-            'total_amount',
-            'duration_days'
-          ],
-          associations: ['deals', 'contacts', 'companies', 'products']
-        });
-
-        setProductSlots(slotsResponse.results || []);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
+      if (result.status === 'SUCCESS') {
+        setProducts(result.response.body.products);
+        setSlots(result.response.body.slots);
+      } else {
+        setError(result.response?.body?.message || 'Failed to load calendar data');
       }
-    };
-
-    fetchData();
-  }, [startDate]);
-
-  // Get slot for a specific product and date
-  const getSlotForCell = (productId, date) => {
-    return productSlots.find(slot => {
-      const slotStart = new Date(slot.properties.start_date);
-      const slotEnd = new Date(slot.properties.end_date);
-      const cellDate = new Date(date);
-
-      // Check if this slot's product matches and date is within range
-      const productMatch = slot.associations?.products?.some(p => p.id === productId);
-      const dateMatch = cellDate >= slotStart && cellDate <= slotEnd;
-
-      return productMatch && dateMatch;
-    });
-  };
-
-  // Check if cell is the first day of a multi-day slot
-  const isSlotStart = (slot, date) => {
-    if (!slot) return false;
-    const slotStart = new Date(slot.properties.start_date);
-    const cellDate = new Date(date);
-    return cellDate.toDateString() === slotStart.toDateString();
-  };
-
-  // Calculate colspan for spanning cells
-  const getColspan = (slot, date, dateRange) => {
-    if (!slot || !isSlotStart(slot, date)) return 0;
-
-    const slotStart = new Date(slot.properties.start_date);
-    const slotEnd = new Date(slot.properties.end_date);
-
-    // Find how many visible columns this slot spans
-    let span = 0;
-    for (let i = 0; i < dateRange.length; i++) {
-      const d = dateRange[i];
-      if (d >= slotStart && d <= slotEnd) {
-        span++;
-      }
+    } catch (err) {
+      console.error('Error fetching calendar data:', err);
+      setError('Failed to load calendar. Please refresh.');
+    } finally {
+      setLoading(false);
     }
-    return span;
-  };
+  }, [runServerless]);
 
-  // Get status color
-  const getStatusColor = (status) => {
-    const colors = {
-      available: '#FFFFFF',
-      on_hold: '#FFF4E6',
-      sold: '#D4EDDA',
-      configuration: '#FFF3CD',
-      delivered: '#D1ECF1'
-    };
-    return colors[status] || '#FFFFFF';
-  };
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-  // Navigate to previous/next 50 days
+  // Navigate dates
   const navigateDays = (days) => {
     const newStart = new Date(startDate);
     newStart.setDate(startDate.getDate() + days);
     setStartDate(newStart);
   };
 
-  // Format date for display
-  const formatDate = (date) => {
-    return `${date.getMonth() + 1}/${date.getDate()}`;
+  const goToToday = () => {
+    setStartDate(new Date());
   };
 
-  // Filter products based on filters
-  const filteredProducts = products.filter(product => {
-    if (filters.productType && product.properties.product_type !== filters.productType) {
-      return false;
-    }
-    // Add more filter logic as needed
-    return true;
-  });
+  // Get slot for a specific product and date
+  const getSlotForCell = useCallback((productId, date) => {
+    return slots.find(slot => {
+      if (slot.productId !== productId) return false;
+
+      const slotStart = new Date(slot.start_date);
+      const slotEnd = new Date(slot.end_date);
+      const cellDate = new Date(date);
+
+      // Normalize to start of day for comparison
+      slotStart.setHours(0, 0, 0, 0);
+      slotEnd.setHours(0, 0, 0, 0);
+      cellDate.setHours(0, 0, 0, 0);
+
+      return cellDate >= slotStart && cellDate <= slotEnd;
+    });
+  }, [slots]);
+
+  // Check if cell is the first day of a slot
+  const isSlotStart = useCallback((slot, date) => {
+    if (!slot) return false;
+    const slotStart = new Date(slot.start_date);
+    const cellDate = new Date(date);
+    slotStart.setHours(0, 0, 0, 0);
+    cellDate.setHours(0, 0, 0, 0);
+    return cellDate.getTime() === slotStart.getTime();
+  }, []);
+
+  // Get status styling
+  const getStatusStyle = (status) => {
+    const styles = {
+      on_hold: { bg: '#FFF4E6', border: '#F0AD4E', text: 'On Hold' },
+      sold: { bg: '#D4EDDA', border: '#28A745', text: 'Sold' },
+      configuration: { bg: '#FFF3CD', border: '#FFC107', text: 'Config' },
+      delivered: { bg: '#D1ECF1', border: '#17A2B8', text: 'Delivered' }
+    };
+    return styles[status] || { bg: '#F8F9FA', border: '#DEE2E6', text: status };
+  };
+
+  // Format date header
+  const formatDateHeader = (date) => {
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
+    return { date: `${month}/${day}`, weekday };
+  };
+
+  // Check if date is today
+  const isToday = (date) => {
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+
+  // Check if date is weekend
+  const isWeekend = (date) => {
+    const day = date.getDay();
+    return day === 0 || day === 6;
+  };
 
   if (loading) {
     return (
-      <Flex direction="column" align="center" justify="center" gap="medium">
+      <Flex direction="column" align="center" justify="center" gap="lg">
         <LoadingSpinner />
         <Text>Loading calendar...</Text>
       </Flex>
     );
   }
 
+  if (error) {
+    return (
+      <Flex direction="column" gap="md">
+        <Alert title="Error" variant="error">
+          {error}
+        </Alert>
+        <Button onClick={fetchData}>Retry</Button>
+      </Flex>
+    );
+  }
+
   return (
-    <Flex direction="column" gap="medium">
-      {/* Header with filters and navigation */}
-      <Flex justify="space-between" align="center">
-        <Text format={{ fontWeight: 'bold', fontSize: 'large' }}>
+    <Flex direction="column" gap="md">
+      {/* Header */}
+      <Flex justify="between" align="center">
+        <Text format={{ fontWeight: 'bold' }}>
           Calendar Sales Grid
         </Text>
-        <Flex gap="small">
-          <Button onClick={() => navigateDays(-50)}>← Previous 50 Days</Button>
-          <Button onClick={() => setStartDate(new Date())}>Today</Button>
-          <Button onClick={() => navigateDays(50)}>Next 50 Days →</Button>
+        <Flex gap="sm">
+          <Button size="sm" onClick={() => navigateDays(-50)}>
+            ← Previous
+          </Button>
+          <Button size="sm" variant="secondary" onClick={goToToday}>
+            Today
+          </Button>
+          <Button size="sm" onClick={() => navigateDays(50)}>
+            Next →
+          </Button>
         </Flex>
       </Flex>
 
+      {/* Date Range Display */}
+      <Text variant="microcopy">
+        Showing: {dateRange[0].toLocaleDateString()} - {dateRange[dateRange.length - 1].toLocaleDateString()}
+      </Text>
+
       {/* Filters */}
-      <Flex gap="small">
+      <Flex gap="sm">
         <Select
-          label="Product Type"
-          placeholder="All Types"
-          value={filters.productType}
-          onChange={(value) => setFilters({ ...filters, productType: value })}
+          label="Filter by Status"
+          value={filterStatus}
+          onChange={(value) => setFilterStatus(value)}
           options={[
-            { value: '', label: 'All Types' },
-            // Add product type options dynamically
+            { label: 'All Statuses', value: '' },
+            { label: 'On Hold', value: 'on_hold' },
+            { label: 'Sold', value: 'sold' },
+            { label: 'Configuration', value: 'configuration' },
+            { label: 'Delivered', value: 'delivered' }
           ]}
         />
-        <Select
-          label="Status"
-          placeholder="All Statuses"
-          value={filters.status}
-          onChange={(value) => setFilters({ ...filters, status: value })}
-          options={[
-            { value: '', label: 'All Statuses' },
-            { value: 'on_hold', label: 'On Hold' },
-            { value: 'sold', label: 'Sold' },
-            { value: 'configuration', label: 'Configuration' },
-            { value: 'delivered', label: 'Delivered' }
-          ]}
-        />
+        <Button variant="secondary" size="sm" onClick={fetchData}>
+          Refresh
+        </Button>
       </Flex>
 
-      {/* Grid Table */}
-      <div style={{ overflowX: 'auto', maxWidth: '100%' }}>
-        <Table bordered>
-          <TableHead>
-            <TableRow>
-              <TableHeader>Product</TableHeader>
-              {dateRange.map((date, idx) => (
-                <TableHeader key={idx} style={{ minWidth: '80px', textAlign: 'center' }}>
-                  <div>{formatDate(date)}</div>
-                  <div style={{ fontSize: '0.8em', color: '#666' }}>
-                    {date.toLocaleDateString('en-US', { weekday: 'short' })}
-                  </div>
-                </TableHeader>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredProducts.map(product => (
-              <TableRow key={product.id}>
-                <TableCell>
-                  <Text format={{ fontWeight: 'bold' }}>
-                    {product.properties.name || 'Unnamed Product'}
-                  </Text>
-                  {product.properties.product_type && (
-                    <div style={{ fontSize: '0.8em', color: '#666' }}>
-                      {product.properties.product_type}
-                    </div>
-                  )}
-                </TableCell>
-                {dateRange.map((date, dateIdx) => {
-                  const slot = getSlotForCell(product.id, date);
-                  const isStart = isSlotStart(slot, date);
-                  const colspan = getColspan(slot, date, dateRange);
+      {/* Legend */}
+      <Flex gap="md" wrap="wrap">
+        <Text variant="microcopy" format={{ fontWeight: 'bold' }}>Legend:</Text>
+        <Flex gap="xs" align="center">
+          <Box inline={true}>
+            <div style={{ width: 16, height: 16, backgroundColor: '#F8F9FA', border: '1px solid #DEE2E6' }} />
+          </Box>
+          <Text variant="microcopy">Available</Text>
+        </Flex>
+        <Flex gap="xs" align="center">
+          <Box inline={true}>
+            <div style={{ width: 16, height: 16, backgroundColor: '#FFF4E6', border: '1px solid #F0AD4E' }} />
+          </Box>
+          <Text variant="microcopy">On Hold</Text>
+        </Flex>
+        <Flex gap="xs" align="center">
+          <Box inline={true}>
+            <div style={{ width: 16, height: 16, backgroundColor: '#D4EDDA', border: '1px solid #28A745' }} />
+          </Box>
+          <Text variant="microcopy">Sold</Text>
+        </Flex>
+        <Flex gap="xs" align="center">
+          <Box inline={true}>
+            <div style={{ width: 16, height: 16, backgroundColor: '#D1ECF1', border: '1px solid #17A2B8' }} />
+          </Box>
+          <Text variant="microcopy">Delivered</Text>
+        </Flex>
+      </Flex>
 
-                  // Skip cells that are part of a previous spanning cell
-                  if (slot && !isStart) {
-                    return null;
-                  }
+      {/* Grid */}
+      {products.length > 0 ? (
+        <Box>
+          <Table bordered={true}>
+            <TableHead>
+              <TableRow>
+                <TableHeader>Product</TableHeader>
+                {dateRange.map((date, idx) => {
+                  const { date: dateStr, weekday } = formatDateHeader(date);
+                  const todayStyle = isToday(date) ? { fontWeight: 'bold' } : {};
+                  const weekendStyle = isWeekend(date) ? { color: '#6C757D' } : {};
 
-                  if (slot && isStart) {
-                    return (
-                      <TableCell
-                        key={dateIdx}
-                        colSpan={colspan}
-                        style={{
-                          backgroundColor: getStatusColor(slot.properties.status),
-                          border: '2px solid #ccc',
-                          padding: '8px',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        <div style={{ fontSize: '0.85em' }}>
-                          <div style={{ fontWeight: 'bold' }}>
-                            {slot.properties.status.replace('_', ' ').toUpperCase()}
-                          </div>
-                          {slot.properties.total_amount && (
-                            <div>${slot.properties.total_amount}</div>
-                          )}
-                          <div style={{ fontSize: '0.9em', color: '#555' }}>
-                            {slot.properties.duration_days} days
-                          </div>
-                        </div>
-                      </TableCell>
-                    );
-                  }
-
-                  // Empty cell - available
                   return (
-                    <TableCell
-                      key={dateIdx}
-                      style={{
-                        backgroundColor: '#f8f9fa',
-                        border: '1px solid #dee2e6',
-                        height: '60px'
-                      }}
-                    />
+                    <TableHeader key={idx}>
+                      <Flex direction="column" align="center">
+                        <Text variant="microcopy" format={{ ...todayStyle, ...weekendStyle }}>
+                          {weekday}
+                        </Text>
+                        <Text variant="microcopy" format={{ ...todayStyle, ...weekendStyle }}>
+                          {dateStr}
+                        </Text>
+                      </Flex>
+                    </TableHeader>
                   );
                 })}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHead>
+            <TableBody>
+              {products.map(product => (
+                <TableRow key={product.id}>
+                  <TableCell>
+                    <Flex direction="column">
+                      <Text format={{ fontWeight: 'bold' }}>
+                        {product.name}
+                      </Text>
+                      <Text variant="microcopy">
+                        ${product.price || 0}/day
+                      </Text>
+                    </Flex>
+                  </TableCell>
+                  {dateRange.map((date, dateIdx) => {
+                    const slot = getSlotForCell(product.id, date);
 
-      {/* Legend */}
-      <Flex gap="small" wrap="wrap">
-        <Text format={{ fontWeight: 'bold' }}>Status Legend:</Text>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <div style={{ width: '20px', height: '20px', backgroundColor: '#f8f9fa', border: '1px solid #ccc' }} />
-          <Text>Available</Text>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <div style={{ width: '20px', height: '20px', backgroundColor: '#FFF4E6', border: '1px solid #ccc' }} />
-          <Text>On Hold</Text>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <div style={{ width: '20px', height: '20px', backgroundColor: '#D4EDDA', border: '1px solid #ccc' }} />
-          <Text>Sold</Text>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <div style={{ width: '20px', height: '20px', backgroundColor: '#FFF3CD', border: '1px solid #ccc' }} />
-          <Text>Configuration</Text>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <div style={{ width: '20px', height: '20px', backgroundColor: '#D1ECF1', border: '1px solid #ccc' }} />
-          <Text>Delivered</Text>
-        </div>
-      </Flex>
+                    // Apply filter
+                    if (filterStatus && slot && slot.status !== filterStatus) {
+                      return (
+                        <TableCell key={dateIdx}>
+                          <div style={{
+                            width: '100%',
+                            height: 40,
+                            backgroundColor: '#F8F9FA'
+                          }} />
+                        </TableCell>
+                      );
+                    }
 
-      {filteredProducts.length === 0 && (
-        <Flex align="center" justify="center">
-          <Text>No products found. Create products in HubSpot to get started.</Text>
-        </Flex>
+                    if (slot) {
+                      const style = getStatusStyle(slot.status);
+                      const showDetails = isSlotStart(slot, date);
+
+                      return (
+                        <TableCell key={dateIdx}>
+                          <div style={{
+                            width: '100%',
+                            minHeight: 40,
+                            backgroundColor: style.bg,
+                            borderLeft: `3px solid ${style.border}`,
+                            padding: 4,
+                            fontSize: 11
+                          }}>
+                            {showDetails ? (
+                              <Flex direction="column">
+                                <Text variant="microcopy" format={{ fontWeight: 'bold' }}>
+                                  {style.text}
+                                </Text>
+                                {slot.total_amount && (
+                                  <Text variant="microcopy">
+                                    ${parseFloat(slot.total_amount).toFixed(0)}
+                                  </Text>
+                                )}
+                              </Flex>
+                            ) : (
+                              <Text variant="microcopy">•</Text>
+                            )}
+                          </div>
+                        </TableCell>
+                      );
+                    }
+
+                    // Empty cell - available
+                    return (
+                      <TableCell key={dateIdx}>
+                        <div style={{
+                          width: '100%',
+                          height: 40,
+                          backgroundColor: isWeekend(date) ? '#F1F3F5' : '#F8F9FA'
+                        }} />
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Box>
+      ) : (
+        <Tile>
+          <Flex direction="column" align="center" gap="md">
+            <Text format={{ fontWeight: 'bold' }}>No Products Found</Text>
+            <Text>
+              Create products in HubSpot (Sales → Products) to start booking slots.
+            </Text>
+          </Flex>
+        </Tile>
       )}
+
+      {/* Summary */}
+      <Flex justify="between">
+        <Text variant="microcopy">
+          {products.length} products • {slots.length} active bookings
+        </Text>
+        <Text variant="microcopy">
+          Last refreshed: {new Date().toLocaleTimeString()}
+        </Text>
+      </Flex>
     </Flex>
   );
 };
 
-export default GridView;
+export default CalendarGridView;

@@ -2,10 +2,10 @@
   "type": "crm-card",
   "data": {
     "title": "Calendar Sales Grid",
-    "location": "crm.index",
-    "uid": "calendar-grid-view",
+    "location": "crm.record.tab",
     "module": {
       "file": "GridView.jsx"
-    }
+    },
+    "objectTypes": []
   }
 }

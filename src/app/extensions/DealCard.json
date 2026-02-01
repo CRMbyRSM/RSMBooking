@@ -3,13 +3,12 @@
   "data": {
     "title": "Product Bookings",
     "location": "crm.record.tab",
-    "uid": "deal-product-bookings",
     "module": {
       "file": "DealCard.jsx"
     },
     "objectTypes": [
       {
-        "name": "deals"
+        "name": "deal"
       }
     ]
   }

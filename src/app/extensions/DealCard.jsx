@@ -1,15 +1,7 @@
-<<<<<<< HEAD
-import React from 'react';
-import { Text } from '@hubspot/ui-extensions';
-
-export default function SimpleCard() {
-  return <Text>Hello from Calendar Sales</Text>;
-}
-=======
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  hubspot,
   Flex,
-  LoadingSpinner,
   Text,
   Button,
   Table,
@@ -18,334 +10,353 @@ import {
   TableHeader,
   TableBody,
   TableCell,
-  Modal,
+  LoadingSpinner,
+  Alert,
   Form,
   Select,
   DateInput,
-  NumberInput,
   TextArea,
-  Alert,
-  hubspot
+  Divider,
+  Tag,
+  EmptyState
 } from '@hubspot/ui-extensions';
 
-const DealCard = ({ context, actions, runServerless }) => {
+// Register the extension
+hubspot.extend(({ context, runServerlessFunction, actions }) => (
+  <DealBookingCard
+    context={context}
+    runServerless={runServerlessFunction}
+    actions={actions}
+  />
+));
+
+const DealBookingCard = ({ context, runServerless, actions }) => {
   const [loading, setLoading] = useState(true);
-  const [productSlots, setProductSlots] = useState([]);
-  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [slots, setSlots] = useState([]);
   const [products, setProducts] = useState([]);
-  const [dealProperties, setDealProperties] = useState(null);
+  const [dealInfo, setDealInfo] = useState(null);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  // Form state for booking
-  const [bookingForm, setBookingForm] = useState({
+  // Form state
+  const [formData, setFormData] = useState({
     productId: '',
     startDate: '',
     endDate: '',
     notes: ''
   });
 
-  const dealId = context.crm?.objectId;
+  const dealId = context.crm.objectId;
 
-  // Fetch deal properties and associated product slots
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!dealId) return;
+  // Fetch initial data
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-      setLoading(true);
-      try {
-        // Fetch deal properties
-        const dealResponse = await hubspot.crm.objects.deal.get({
-          objectId: dealId,
-          properties: ['dealname', 'amount', 'dealstage', 'hs_object_id'],
-          associations: ['contacts', 'companies', 'line_items', 'product_slots']
-        });
-        setDealProperties(dealResponse);
+    try {
+      // Fetch products for dropdown
+      const productsResult = await runServerless({
+        name: 'getProducts',
+        parameters: {}
+      });
 
-        // Fetch associated product slots
-        if (dealResponse.associations?.product_slots) {
-          const slotIds = dealResponse.associations.product_slots.map(s => s.id);
-          const slotsPromises = slotIds.map(id =>
-            hubspot.crm.objects.custom.product_slots.get({
-              objectId: id,
-              properties: [
-                'slot_name',
-                'start_date',
-                'end_date',
-                'status',
-                'product_name',
-                'total_amount',
-                'duration_days'
-              ]
-            })
-          );
-          const slots = await Promise.all(slotsPromises);
-          setProductSlots(slots);
-        }
-
-        // Fetch all products for booking dropdown
-        const productsResponse = await hubspot.crm.objects.products.list({
-          limit: 100,
-          properties: ['name', 'price', 'product_type']
-        });
-        setProducts(productsResponse.results || []);
-
-      } catch (err) {
-        console.error('Error fetching deal data:', err);
-        setError('Failed to load booking data');
-      } finally {
-        setLoading(false);
+      if (productsResult.status === 'SUCCESS') {
+        setProducts(productsResult.response.body.products);
       }
-    };
 
+      // Fetch slots for this deal
+      const slotsResult = await runServerless({
+        name: 'getSlotsForDeal',
+        parameters: { dealId }
+      });
+
+      if (slotsResult.status === 'SUCCESS') {
+        setSlots(slotsResult.response.body.slots);
+        setDealInfo(slotsResult.response.body.deal);
+      }
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError('Failed to load booking data. Please refresh.');
+    } finally {
+      setLoading(false);
+    }
+  }, [dealId, runServerless]);
+
+  useEffect(() => {
     fetchData();
-  }, [dealId]);
+  }, [fetchData]);
 
-  // Handle booking form submission
-  const handleBookSlot = async () => {
+  // Handle form submission
+  const handleSubmit = async () => {
     setError(null);
     setSuccess(null);
 
+    // Validation
+    if (!formData.productId) {
+      setError('Please select a product');
+      return;
+    }
+    if (!formData.startDate || !formData.endDate) {
+      setError('Please select start and end dates');
+      return;
+    }
+
+    const startDate = new Date(formData.startDate);
+    const endDate = new Date(formData.endDate);
+
+    if (endDate < startDate) {
+      setError('End date must be after start date');
+      return;
+    }
+
+    setSubmitting(true);
+
     try {
-      // Validate form
-      if (!bookingForm.productId || !bookingForm.startDate || !bookingForm.endDate) {
-        setError('Please fill in all required fields');
-        return;
-      }
+      const selectedProduct = products.find(p => p.id === formData.productId);
 
-      const startDate = new Date(bookingForm.startDate);
-      const endDate = new Date(bookingForm.endDate);
-
-      if (endDate < startDate) {
-        setError('End date must be after start date');
-        return;
-      }
-
-      // Calculate duration
-      const durationMs = endDate - startDate;
-      const durationDays = Math.ceil(durationMs / (1000 * 60 * 60 * 24)) + 1;
-
-      // Get product details
-      const selectedProduct = products.find(p => p.id === bookingForm.productId);
-      const dailyRate = parseFloat(selectedProduct?.properties?.price || 0);
-      const totalAmount = dailyRate * durationDays;
-
-      // Create product slot
-      const slotName = `${selectedProduct?.properties?.name} - ${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}`;
-
-      const newSlot = await hubspot.crm.objects.custom.product_slots.create({
-        properties: {
-          slot_name: slotName,
-          start_date: bookingForm.startDate,
-          end_date: bookingForm.endDate,
-          status: 'on_hold', // Default status for new bookings
-          product_name: selectedProduct?.properties?.name,
-          product_type: selectedProduct?.properties?.product_type,
-          daily_rate: dailyRate,
-          total_amount: totalAmount,
-          duration_days: durationDays,
-          booking_notes: bookingForm.notes
+      const result = await runServerless({
+        name: 'createBooking',
+        parameters: {
+          dealId,
+          productId: formData.productId,
+          productName: selectedProduct?.name || 'Unknown Product',
+          productPrice: selectedProduct?.price || '0',
+          startDate: formData.startDate,
+          endDate: formData.endDate,
+          notes: formData.notes
         }
       });
 
-      // Associate slot with deal
-      await hubspot.crm.associations.create({
-        fromObjectType: 'product_slots',
-        fromObjectId: newSlot.id,
-        toObjectType: 'deals',
-        toObjectId: dealId,
-        associationType: 'product_slot_to_deal'
-      });
-
-      // Associate slot with product
-      await hubspot.crm.associations.create({
-        fromObjectType: 'product_slots',
-        fromObjectId: newSlot.id,
-        toObjectType: 'products',
-        toObjectId: bookingForm.productId,
-        associationType: 'product_slot_to_product'
-      });
-
-      // Associate slot with contacts from deal
-      if (dealProperties?.associations?.contacts) {
-        for (const contact of dealProperties.associations.contacts) {
-          await hubspot.crm.associations.create({
-            fromObjectType: 'product_slots',
-            fromObjectId: newSlot.id,
-            toObjectType: 'contacts',
-            toObjectId: contact.id,
-            associationType: 'product_slot_to_contact'
-          });
-        }
+      if (result.status === 'SUCCESS') {
+        setSuccess(result.response.body.message);
+        setShowForm(false);
+        setFormData({ productId: '', startDate: '', endDate: '', notes: '' });
+        // Refresh slots
+        fetchData();
+      } else {
+        setError(result.response?.body?.message || 'Failed to create booking');
       }
-
-      // Associate slot with companies from deal
-      if (dealProperties?.associations?.companies) {
-        for (const company of dealProperties.associations.companies) {
-          await hubspot.crm.associations.create({
-            fromObjectType: 'product_slots',
-            fromObjectId: newSlot.id,
-            toObjectType: 'companies',
-            toObjectId: company.id,
-            associationType: 'product_slot_to_company'
-          });
-        }
-      }
-
-      // Add product as line item to deal (optional)
-      // This would require line items API implementation
-
-      setSuccess(`Successfully booked ${durationDays} days for ${selectedProduct?.properties?.name}`);
-      setShowBookingModal(false);
-
-      // Refresh product slots
-      setProductSlots([...productSlots, newSlot]);
-
-      // Reset form
-      setBookingForm({
-        productId: '',
-        startDate: '',
-        endDate: '',
-        notes: ''
-      });
-
     } catch (err) {
       console.error('Error creating booking:', err);
       setError('Failed to create booking. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  // Get status badge color
-  const getStatusBadge = (status) => {
-    const badges = {
-      on_hold: { color: 'warning', text: 'On Hold' },
-      sold: { color: 'success', text: 'Sold' },
-      configuration: { color: 'info', text: 'Configuration' },
-      delivered: { color: 'default', text: 'Delivered' }
+  // Update slot status
+  const handleStatusChange = async (slotId, newStatus) => {
+    try {
+      const result = await runServerless({
+        name: 'updateBookingStatus',
+        parameters: { slotId, status: newStatus }
+      });
+
+      if (result.status === 'SUCCESS') {
+        setSuccess(`Status updated to ${newStatus}`);
+        fetchData();
+      }
+    } catch (err) {
+      setError('Failed to update status');
+    }
+  };
+
+  // Calculate totals
+  const totalValue = slots.reduce(
+    (sum, slot) => sum + (parseFloat(slot.total_amount) || 0),
+    0
+  );
+
+  // Status badge styling
+  const getStatusTag = (status) => {
+    const variants = {
+      on_hold: 'warning',
+      sold: 'success',
+      configuration: 'default',
+      delivered: 'info'
     };
-    return badges[status] || { color: 'default', text: status };
+    const labels = {
+      on_hold: 'On Hold',
+      sold: 'Sold',
+      configuration: 'Configuration',
+      delivered: 'Delivered'
+    };
+    return {
+      variant: variants[status] || 'default',
+      label: labels[status] || status
+    };
   };
 
   if (loading) {
     return (
-      <Flex align="center" justify="center">
+      <Flex direction="column" align="center" justify="center" gap="md">
         <LoadingSpinner />
+        <Text>Loading bookings...</Text>
       </Flex>
     );
   }
 
   return (
-    <Flex direction="column" gap="medium">
-      {error && <Alert variant="error">{error}</Alert>}
-      {success && <Alert variant="success">{success}</Alert>}
-
-      <Flex justify="space-between" align="center">
-        <Text format={{ fontWeight: 'bold' }}>Product Bookings</Text>
-        <Button variant="primary" onClick={() => setShowBookingModal(true)}>
-          Book Slots
+    <Flex direction="column" gap="md">
+      {/* Header */}
+      <Flex justify="between" align="center">
+        <Text format={{ fontWeight: 'bold' }}>
+          Product Bookings
+        </Text>
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => setShowForm(!showForm)}
+        >
+          {showForm ? 'Cancel' : 'Book Slots'}
         </Button>
       </Flex>
 
-      {productSlots.length > 0 ? (
-        <Table bordered>
-          <TableHead>
-            <TableRow>
-              <TableHeader>Product</TableHeader>
-              <TableHeader>Dates</TableHeader>
-              <TableHeader>Duration</TableHeader>
-              <TableHeader>Amount</TableHeader>
-              <TableHeader>Status</TableHeader>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {productSlots.map(slot => (
-              <TableRow key={slot.id}>
-                <TableCell>{slot.properties.product_name || 'N/A'}</TableCell>
-                <TableCell>
-                  {new Date(slot.properties.start_date).toLocaleDateString()} -
-                  {new Date(slot.properties.end_date).toLocaleDateString()}
-                </TableCell>
-                <TableCell>{slot.properties.duration_days} days</TableCell>
-                <TableCell>${slot.properties.total_amount || 0}</TableCell>
-                <TableCell>
-                  <span style={{
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    backgroundColor: slot.properties.status === 'sold' ? '#d4edda' : '#fff4e6',
-                    fontSize: '0.85em'
-                  }}>
-                    {getStatusBadge(slot.properties.status).text}
-                  </span>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
-        <Text>No bookings yet. Click "Book Slots" to create your first booking.</Text>
+      {/* Alerts */}
+      {error && (
+        <Alert title="Error" variant="error">
+          {error}
+        </Alert>
+      )}
+      {success && (
+        <Alert title="Success" variant="success">
+          {success}
+        </Alert>
       )}
 
-      {/* Booking Modal */}
-      {showBookingModal && (
-        <Modal
-          title="Book Product Slots"
-          onClose={() => setShowBookingModal(false)}
-          width="medium"
-        >
-          <Flex direction="column" gap="medium">
-            <Select
-              label="Product"
-              name="productId"
-              required
-              value={bookingForm.productId}
-              onChange={(value) => setBookingForm({ ...bookingForm, productId: value })}
-              options={[
-                { value: '', label: 'Select a product...' },
-                ...products.map(p => ({
-                  value: p.id,
-                  label: `${p.properties.name} - $${p.properties.price || 0}/day`
-                }))
-              ]}
-            />
+      {/* Booking Form */}
+      {showForm && (
+        <Flex direction="column" gap="sm">
+          <Divider />
+          <Text format={{ fontWeight: 'bold' }}>New Booking</Text>
 
+          <Select
+            label="Product"
+            name="productId"
+            required={true}
+            value={formData.productId}
+            onChange={(value) => setFormData({ ...formData, productId: value })}
+            options={[
+              { label: 'Select a product...', value: '' },
+              ...products.map(p => ({
+                label: `${p.name} - $${p.price || 0}/day`,
+                value: p.id
+              }))
+            ]}
+          />
+
+          <Flex gap="sm">
             <DateInput
               label="Start Date"
               name="startDate"
-              required
-              value={bookingForm.startDate}
-              onChange={(value) => setBookingForm({ ...bookingForm, startDate: value })}
+              required={true}
+              value={formData.startDate}
+              onChange={(value) => setFormData({ ...formData, startDate: value })}
             />
-
             <DateInput
               label="End Date"
               name="endDate"
-              required
-              value={bookingForm.endDate}
-              onChange={(value) => setBookingForm({ ...bookingForm, endDate: value })}
+              required={true}
+              value={formData.endDate}
+              onChange={(value) => setFormData({ ...formData, endDate: value })}
             />
-
-            <TextArea
-              label="Booking Notes"
-              name="notes"
-              value={bookingForm.notes}
-              onChange={(value) => setBookingForm({ ...bookingForm, notes: value })}
-              placeholder="Any special requirements or notes..."
-            />
-
-            <Flex gap="small" justify="end">
-              <Button onClick={() => setShowBookingModal(false)}>
-                Cancel
-              </Button>
-              <Button variant="primary" onClick={handleBookSlot}>
-                Create Booking
-              </Button>
-            </Flex>
           </Flex>
-        </Modal>
+
+          <TextArea
+            label="Notes"
+            name="notes"
+            value={formData.notes}
+            onChange={(value) => setFormData({ ...formData, notes: value })}
+            placeholder="Special requirements, instructions..."
+          />
+
+          <Flex justify="end" gap="sm">
+            <Button onClick={() => setShowForm(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={handleSubmit}
+              disabled={submitting}
+            >
+              {submitting ? 'Creating...' : 'Create Booking'}
+            </Button>
+          </Flex>
+
+          <Divider />
+        </Flex>
+      )}
+
+      {/* Bookings Table */}
+      {slots.length > 0 ? (
+        <>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableHeader>Product</TableHeader>
+                <TableHeader>Dates</TableHeader>
+                <TableHeader>Days</TableHeader>
+                <TableHeader>Amount</TableHeader>
+                <TableHeader>Status</TableHeader>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {slots.map((slot) => {
+                const statusTag = getStatusTag(slot.status);
+                return (
+                  <TableRow key={slot.id}>
+                    <TableCell>
+                      <Text format={{ fontWeight: 'bold' }}>
+                        {slot.product_name || 'N/A'}
+                      </Text>
+                    </TableCell>
+                    <TableCell>
+                      <Text>
+                        {new Date(slot.start_date).toLocaleDateString()} →{' '}
+                        {new Date(slot.end_date).toLocaleDateString()}
+                      </Text>
+                    </TableCell>
+                    <TableCell>
+                      <Text>{slot.duration_days}</Text>
+                    </TableCell>
+                    <TableCell>
+                      <Text format={{ fontWeight: 'bold' }}>
+                        ${parseFloat(slot.total_amount || 0).toFixed(2)}
+                      </Text>
+                    </TableCell>
+                    <TableCell>
+                      <Tag variant={statusTag.variant}>
+                        {statusTag.label}
+                      </Tag>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+
+          {/* Total */}
+          <Flex justify="end">
+            <Text format={{ fontWeight: 'bold' }}>
+              Total: ${totalValue.toFixed(2)}
+            </Text>
+          </Flex>
+        </>
+      ) : (
+        <EmptyState
+          title="No bookings yet"
+          layout="vertical"
+          reverseOrder={true}
+        >
+          <Text>
+            Click "Book Slots" to reserve products for this deal.
+          </Text>
+        </EmptyState>
       )}
     </Flex>
   );
 };
 
-export default DealCard;
->>>>>>> backup-full-version
+export default DealBookingCard;

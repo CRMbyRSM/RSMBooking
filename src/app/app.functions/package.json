@@ -1,8 +1,9 @@
 {
-  "name": "calendar-sales-functions",
+  "name": "rsm-booking-functions",
   "version": "1.0.0",
-  "description": "Serverless functions for Calendar Sales HubSpot app",
+  "description": "Serverless functions for RSM Booking app",
+  "main": "bookingApi.js",
   "dependencies": {
-    "@hubspot/serverless-runtime-lib": "^latest"
+    "@hubspot/api-client": "^11.0.0"
   }
 }
