@@ -1,0 +1,24 @@
+name: Deploy to HubSpot
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allow manual trigger
+
+env:
+  DEFAULT_ACCOUNT_ID: ${{ secrets.HUBSPOT_ACCOUNT_ID }}
+  DEFAULT_PERSONAL_ACCESS_KEY: ${{ secrets.HUBSPOT_PERSONAL_ACCESS_KEY }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Project
+        uses: HubSpot/hubspot-project-actions/project-validate@v1.0.1
+
+      - name: Upload & Deploy
+        uses: HubSpot/hubspot-project-actions/project-upload@v1.0.1
